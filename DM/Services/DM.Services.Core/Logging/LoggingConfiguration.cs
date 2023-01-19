@@ -45,12 +45,13 @@ public static class LoggingConfiguration
             .ConfigureResource(r => r.AddService(applicationName))
             .AddAspNetCoreInstrumentation()
             .AddGrpcClientInstrumentation()
-            .AddHttpClientInstrumentation()
+            .AddHttpClientInstrumentation(options => options.Filter = message => 
+                message.RequestUri?.ToString().Contains("_bulk") is not true)
             .AddEntityFrameworkCoreInstrumentation(opts => opts.SetDbStatementForText = true)
             .AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources") // MongoDb is not too fancy
             .AddJamqClientInstrumentation()
             .AddConsoleExporter()
-            .AddJaegerExporter(options => options.Endpoint = new Uri(connectionStrings.TracingEndpoint)));
+            .AddJaegerExporter(options => options.Endpoint = new Uri(connectionStrings.JaegerTracingEndpoint)));
 
         return services.AddLogging(b => b.AddSerilog());
     }

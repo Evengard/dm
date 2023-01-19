@@ -13,7 +13,7 @@ x-workload-env: &workload-env
   DM_ConnectionStrings__Mongo: mongodb://dm-mongo:27017/dm3-5?maxPoolSize=1000
   DM_ConnectionStrings__SearchEngine: http://dm-es:9200
   DM_ConnectionStrings__Logs: http://dm-es:9200
-  DM_ConnectionStrings__TracingEndpoint: http://localhost:14268/api/traces
+  DM_ConnectionStrings__JaegerTracingEndpoint: http://dm-jaeger:14268/api/traces
 
   DM_RabbitMqConfiguration__Endpoint: amqp://dm-rmq:5672/
   DM_RabbitMqConfiguration__Username: guest
@@ -44,7 +44,13 @@ x-workload-env: &workload-env
   DM_IntegrationSettings__MobileUrl:
   DM_IntegrationSettings__CorsUrls__0: http://localhost:5050
   DM_IntegrationSettings__CorsUrls__1: http://localhost:8080
+  DM_IntegrationSettings__CorsUrls__2: http://localhost:5173
   PORT: 5050
+  MigrationOnStart: true
+
+  DD_AGENT_HOST: dm-datadog
+  DD_TRACE_AGENT_PORT: 8126
+  DD_LOGS_INJECTION: true
 
 services:
   postgres:
@@ -118,6 +124,22 @@ services:
     volumes:
       - minio:/minio
 
+  datadog:
+    container_name: 'dm-datadog'
+    image: datadog/agent:7
+    ports:
+      - '8125:8125/udp'
+      - '8126:8126/tcp'
+    environment:
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+      DD_API_KEY: guesswhat
+      DD_SITE: datadoghq.eu
+      DD_APM_ENABLED: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc:/host/proc/:ro
+      - /sys/fs/cgroup:/host/sys/cgroup:ro
+
   jaeger:
     container_name: 'dm-jaeger'
     image: jaegertracing/all-in-one:1.6
@@ -134,7 +156,6 @@ services:
 
   dmemailsenderconsumer:
     container_name: 'dm-email-sender-consumer'
-    image: 'dm-consumer-mail:local-latest'
     build:
       context: .
       dockerfile: Dockerfile
@@ -149,7 +170,6 @@ services:
 
   dmsearchengineconsumer:
     container_name: 'dm-search-engine-consumer'
-    image: 'dm-consumer-search:local-latest'
     build:
       context: .
       dockerfile: Dockerfile
@@ -164,7 +184,6 @@ services:
 
   dmnotificationsconsumer:
     container_name: 'dm-notifications-consumer'
-    image: 'dm-consumer-notification:local-latest'
     build:
       context: .
       dockerfile: Dockerfile
@@ -179,7 +198,6 @@ services:
 
   dmapi:
     container_name: 'dm-api'
-    image: 'dm-api:local-latest'
     build:
       context: .
       dockerfile: Dockerfile

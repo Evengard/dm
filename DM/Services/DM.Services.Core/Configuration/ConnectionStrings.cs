@@ -26,11 +26,6 @@ public class ConnectionStrings
     public string SearchEngine { get; set; }
 
     /// <summary>
-    /// Message queue connection string
-    /// </summary>
-    public string MessageQueue { get; set; }
-
-    /// <summary>
     /// Logging storage connection string
     /// </summary>
     public string Logs { get; set; }
@@ -38,5 +33,5 @@ public class ConnectionStrings
     /// <summary>
     /// Jaeger sink for Tracing
     /// </summary>
-    public string TracingEndpoint { get; set; }
+    public string JaegerTracingEndpoint { get; set; }
 }
