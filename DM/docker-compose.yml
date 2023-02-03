@@ -66,7 +66,7 @@ services:
     image: 'dm-migration:local-latest'
     build:
       context: .
-      dockerfile: Dockerfile.migration
+      dockerfile: Migration.Dockerfile
     environment: *workload-env
     depends_on:
       - postgres
