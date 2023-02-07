@@ -7,13 +7,15 @@ pipeline {
 			agent {
 				docker {
 					image 'mcr.microsoft.com/dotnet/sdk:6.0'
+					args '-v /srv/msbuildlogger:/msbuildlogger'
 				}
 			}
 			environment {
 				HOME = "/tmp/jenkins"
 			}
 			steps {
-				sh 'dotnet build DM/DM.sln'
+				dotnetBuild project: 'DM/DM.sln', option: '-logger:/msbuildlogger/MSBuildJenkins.dll'
+				recordIssues tool: issues(pattern: 'issues.json.log')
 			}
 		}
 	}
