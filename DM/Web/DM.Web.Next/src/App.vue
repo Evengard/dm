@@ -17,7 +17,8 @@
 import { RouterView } from "vue-router";
 import HeaderMain from "@/components/layouts/HeaderMain.vue";
 
-const theme = "light";
+// const theme = "light";
+const theme = "dark";
 </script>
 
 <style lang="stylus">
@@ -27,7 +28,6 @@ const theme = "light";
 html, body, #app
   height 100%
   margin 0
-  overflow hidden
 
 body
   font-family 'PT Sans', sans-serif
@@ -44,13 +44,13 @@ body
 
 header
   grid-area hd
-  theme(background-color, $background)
+  theme(background-color, $panelBackground)
   theme(color, $text)
   padding 0 1rem 0 2rem
 
 footer
   grid-area ft
-  theme(background-color, $backgroundReversed)
+  theme(background-color, $panelBackground)
   theme(color, $textReversed)
   padding 0 1rem 0 2rem
 
@@ -65,14 +65,45 @@ main
   theme(background-color, $background)
   theme(color, $text)
   theme(background-color, $background)
+  padding 0 2rem 2rem 0
 
 for num in (0..5)
   h{num+1}
     font-size (2.5rem - .25*num)
     margin 1rem 0 .5rem
+    theme(color, $textHeading)
+
+p
+  font-size 1.25rem
+  margin-bottom .5rem
 
 a
   theme(color, $activeText)
   &:hover
     theme(color, $activeHoverText)
+
+b
+strong
+  font-weight bold
+
+em
+i
+  font-style italic
+
+ul
+ol
+  margin 0 0 .5rem .5rem
+  font-size 1.125rem
+  padding-left 1rem
+  li
+    margin .25rem .5rem
+
+ul
+  li
+    list-style disc outside
+
+ol
+  li
+    list-style decimal outside
+    padding-left .25rem
 </style>
