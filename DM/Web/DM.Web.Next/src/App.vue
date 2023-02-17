@@ -22,7 +22,9 @@ const theme = "light";
 </script>
 
 <style lang="stylus">
-@import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+//@import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+//@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import "assets/styles/themes.styl"
 
 html, body, #app
@@ -30,7 +32,9 @@ html, body, #app
   margin 0
 
 body
-  font-family 'PT Sans', sans-serif
+  //font-family 'PT Sans', sans-serif
+  //font-family Nunito, sans-serif
+  font-family Roboto, sans-serif
   font-size 16px
   line-height 1.25
   word-wrap break-word
@@ -90,7 +94,7 @@ for num in (0..5)
     theme(color, $textHeading)
 
 p
-  font-size 1.25rem
+  font-size 1.125rem
   margin-bottom .75rem
 
 a
