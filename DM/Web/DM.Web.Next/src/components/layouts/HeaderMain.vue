@@ -67,7 +67,7 @@ const mobileListVisible = ref(true);
       theme(background-color, $background)
       padding .5rem
       border 1px solid
-      theme(border-color, $textHeading)
+      theme(border-color, $border)
       &.active
         display flex
         flex-direction column
