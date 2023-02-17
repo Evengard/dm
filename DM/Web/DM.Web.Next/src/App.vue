@@ -17,8 +17,8 @@
 import { RouterView } from "vue-router";
 import HeaderMain from "@/components/layouts/HeaderMain.vue";
 
-// const theme = "light";
-const theme = "dark";
+const theme = "light";
+// const theme = "dark";
 </script>
 
 <style lang="stylus">
@@ -32,7 +32,7 @@ html, body, #app
 body
   font-family 'PT Sans', sans-serif
   font-size 16px
-  line-height 1.3
+  line-height 1.25
   word-wrap break-word
 
 #layout
@@ -41,18 +41,34 @@ body
   grid-template-columns 20rem 1fr
   grid-template-rows  3rem auto 2rem
   grid-template-areas "hd hd" "sd main" "ft ft"
+  @media screen and (max-width: 1200px)
+    grid-template-columns 15rem 1fr
+  @media screen and (max-width: 900px)
+    display block
+    header
+      height 3rem
+      padding 0 1rem
+    footer
+      height 2rem
+      padding 0 1rem
+    main
+      padding 0 1rem
 
 header
   grid-area hd
   theme(background-color, $panelBackground)
-  theme(color, $text)
-  padding 0 1rem 0 2rem
+  theme(color, $textHeading)
+  padding 0 2rem
+  a
+    theme(color, $textHeading)
+    &:hover
+      text-decoration none
 
 footer
   grid-area ft
   theme(background-color, $panelBackground)
   theme(color, $textReversed)
-  padding 0 1rem 0 2rem
+  padding 0 2rem
 
 #sidebar
   grid-area sd
@@ -69,18 +85,19 @@ main
 
 for num in (0..5)
   h{num+1}
-    font-size (2.5rem - .25*num)
+    font-size (1.75rem - .125*num)
     margin 1rem 0 .5rem
     theme(color, $textHeading)
 
 p
   font-size 1.25rem
-  margin-bottom .5rem
+  margin-bottom .75rem
 
 a
   theme(color, $activeText)
   &:hover
     theme(color, $activeHoverText)
+    text-decoration underline
 
 b
 strong
@@ -106,4 +123,8 @@ ol
   li
     list-style decimal outside
     padding-left .25rem
+
+hr
+  border-top: 1px solid
+  theme(border-top-color, $textHeading)
 </style>
