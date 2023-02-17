@@ -1,15 +1,17 @@
 <template>
-  <div id="layout" :class="`theme-${theme}`">
-    <header>
-      <header-main></header-main>
-    </header>
-    <div id="sidebar">
-      <RouterView name="SideBar" />
+  <div id="wrapper" :class="`theme-${theme}`">
+    <div id="layout">
+      <header>
+        <header-main></header-main>
+      </header>
+      <div id="sidebar">
+        <RouterView name="SideBar" />
+      </div>
+      <main>
+        <RouterView />
+      </main>
+      <footer></footer>
     </div>
-    <main>
-      <RouterView />
-    </main>
-    <footer></footer>
   </div>
 </template>
 
@@ -17,8 +19,8 @@
 import { RouterView } from "vue-router";
 import HeaderMain from "@/components/layouts/HeaderMain.vue";
 
-const theme = "light";
-// const theme = "dark";
+// const theme = "light";
+const theme = "dark";
 </script>
 
 <style lang="stylus">
@@ -26,10 +28,6 @@ const theme = "light";
 //@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import "assets/styles/themes.styl"
-
-html, body, #app
-  height 100%
-  margin 0
 
 body
   //font-family 'PT Sans', sans-serif
@@ -41,7 +39,8 @@ body
 
 #layout
   display grid
-  height 100%
+  min-height 100vh
+  theme(background-color, $background)
   grid-template-columns 20rem 1fr
   grid-template-rows  3rem auto 2rem
   grid-template-areas "hd hd" "sd main" "ft ft"
@@ -56,6 +55,8 @@ body
       height 2rem
       padding 0 1rem
     main
+      padding 0 1rem
+    #sidebar
       padding 0 1rem
 
 header
@@ -76,7 +77,6 @@ footer
 
 #sidebar
   grid-area sd
-  theme(background-color, $background)
   theme(color, $text)
   padding 0 1rem 0 2rem
 
@@ -84,7 +84,6 @@ main
   grid-area main
   theme(background-color, $background)
   theme(color, $text)
-  theme(background-color, $background)
   padding 0 2rem 2rem 0
 
 for num in (0..5)
@@ -130,5 +129,5 @@ ol
 
 hr
   border-top: 1px solid
-  theme(border-top-color, $textHeading)
+  theme(border-top-color, $border)
 </style>
