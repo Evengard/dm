@@ -49,7 +49,7 @@ const mobileListVisible = ref(true);
     flex 1
     font-size 1.25rem
   .profile
-    text-align end
+    text-align right
     margin-left 2rem
     font-size 1.5rem
   .menu-mobile

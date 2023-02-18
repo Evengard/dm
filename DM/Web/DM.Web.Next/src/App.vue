@@ -1,8 +1,8 @@
 <template>
-  <div id="wrapper" :class="`theme-${theme}`">
+  <div id="wrapper" :class="`theme-${settings.theme}`">
     <div id="layout">
       <header>
-        <header-main></header-main>
+        <header-main />
       </header>
       <div id="sidebar">
         <RouterView name="SideBar" />
@@ -10,7 +10,9 @@
       <main>
         <RouterView />
       </main>
-      <footer></footer>
+      <footer>
+        <footer-main />
+      </footer>
     </div>
   </div>
 </template>
@@ -18,9 +20,16 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
 import HeaderMain from "@/components/layouts/HeaderMain.vue";
+import FooterMain from "@/components/layouts/FooterMain.vue";
+import { useSettingsStore } from "@/stores/settings";
+import { onMounted } from "vue";
 
 // const theme = "light";
-const theme = "dark";
+const settings = useSettingsStore();
+
+onMounted(() => {
+  settings.getTheme();
+});
 </script>
 
 <style lang="stylus">
@@ -72,7 +81,7 @@ header
 footer
   grid-area ft
   theme(background-color, $panelBackground)
-  theme(color, $textReversed)
+  theme(color, $textHeading)
   padding 0 2rem
 
 #sidebar
