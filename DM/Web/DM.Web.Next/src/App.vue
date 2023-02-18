@@ -33,15 +33,15 @@ onMounted(() => {
 </script>
 
 <style lang="stylus">
-//@import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 //@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import "assets/styles/themes.styl"
 
 body
-  //font-family 'PT Sans', sans-serif
+  font-family 'PT Sans', sans-serif
   //font-family Nunito, sans-serif
-  font-family Roboto, sans-serif
+  //font-family Roboto, sans-serif
   font-size 16px
   line-height 1.25
   word-wrap break-word
