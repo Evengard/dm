@@ -23,7 +23,7 @@ volumes: [
 				}
 				stage('DotNet Test') {
 					warnError('Tests failed!') {
-						dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', properties: ['UseRazorBuildServer': 'false', 'UseSharedCompilation': 'false'], noBuild: true, noRestore: true, nologo: true, verbosity: 'quiet'
+						dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', properties: ['UseRazorBuildServer': 'false', 'UseSharedCompilation': 'false', 'ParallelizeTestCollections': 'false'], noBuild: true, noRestore: true, nologo: true, verbosity: 'quiet'
 					}
 					sh '/srv/tools/trx2junit UnitTestResults/*.trx'
 					recordIssues tool: junitParser(pattern: 'UnitTestResults/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
@@ -32,16 +32,18 @@ volumes: [
 			}
 		}, typescript: {
 			container('nodejs') {
-				stage('VueJs Build') {
-					//try {
-						dir("DM/Web/DM.Web.Modern") {
-							sh 'yarn install --network-timeout 300000'
-							sh 'yarn build'
+				dir("DM/Web/DM.Web.Next") {
+					stage('VueJs Build') {
+						sh 'yarn install --network-timeout 300000'
+						sh 'yarn upgrade --latest --network-timeout 300000'
+						sh 'yarn build'
+					}
+					stage('VueJS Lint') {
+						warnError('Lint failed!') {
+							sh 'yarn lint --format checkstyle --output-file eslintreport.xml'
 						}
-					//}
-					//finally {
-						//recordIssues tool: esLint(), enabledForFailure: true, qualityGates: [[threshold: 1, type: 'TOTAL_ERROR', unstable: false], [threshold: 1, type: 'NEW_NORMAL', unstable: true]], publishAllIssues: true
-					//}
+						recordIssues tool: esLint(pattern: 'eslintreport.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
+					}
 				}
 			}
 		})
