@@ -3,9 +3,6 @@
 podTemplate(containers: [
 	containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'MSBUILDDISABLENODEREUSE', value: '1')]),
 	containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
-],
-volumes: [
-	hostPathVolume(mountPath: '/srv', hostPath: '/srv'),
 ]) {
 	node(POD_LABEL) {
 		stage('Checkout') {
