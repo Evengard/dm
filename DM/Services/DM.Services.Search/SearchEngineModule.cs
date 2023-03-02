@@ -8,7 +8,7 @@ using DM.Services.DataAccess;
 using DM.Services.DataAccess.SearchEngine;
 using DM.Services.Search.Configuration;
 using Microsoft.Extensions.Options;
-using Nest;
+using OpenSearch.Client;
 using Module = Autofac.Module;
 
 namespace DM.Services.Search;
@@ -31,7 +31,7 @@ public class SearchEngineModule : Module
             })
             .SingleInstance();
 
-        builder.Register(x => new ElasticClient(x.Resolve<ConnectionSettings>()))
+        builder.Register(x => new OpenSearchClient(x.Resolve<ConnectionSettings>()))
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();
 

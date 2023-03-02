@@ -7,6 +7,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Filters;
+using Serilog.Sinks.Elasticsearch;
 
 namespace DM.Services.Core.Logging;
 
@@ -32,9 +33,12 @@ public static class LoggingConfiguration
             .WriteTo.Logger(lc => lc
                 .Filter.ByExcluding(Matching.FromSource("Microsoft"))
                 .WriteTo.Elasticsearch(
-                    connectionStrings.Logs,
-                    "dm_logstash-{0:yyyy.MM.dd}",
-                    inlineFields: true))
+                    new ElasticsearchSinkOptions(new Uri(connectionStrings.Logs))
+                    {
+                        IndexFormat = "dm_logstash-{0:yyyy.MM.dd}",
+                        InlineFields = true,
+                        TypeName = null,
+                    }))
             .WriteTo.Logger(lc => lc
                 .WriteTo.Console())
             .CreateLogger();

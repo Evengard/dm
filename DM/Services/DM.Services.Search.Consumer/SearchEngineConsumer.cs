@@ -10,7 +10,7 @@ using Jamq.Client.Abstractions.Consuming;
 using Jamq.Client.Rabbit.Consuming;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Nest;
+using OpenSearch.Client;
 using Polly;
 using Polly.Retry;
 using Policy = Polly.Policy;
@@ -20,13 +20,13 @@ namespace DM.Services.Search.Consumer;
 internal class SearchEngineConsumer : BackgroundService
 {
     private readonly ILogger<SearchEngineConsumer> logger;
-    private readonly IElasticClient elasticClient;
+    private readonly IOpenSearchClient elasticClient;
     private readonly IConsumerBuilder consumerBuilder;
     private readonly RetryPolicy consumeRetryPolicy;
 
     public SearchEngineConsumer(
         ILogger<SearchEngineConsumer> logger,
-        IElasticClient elasticClient,
+        IOpenSearchClient elasticClient,
         IConsumerBuilder consumerBuilder)
     {
         this.logger = logger;

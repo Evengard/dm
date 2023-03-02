@@ -5,18 +5,18 @@ using System.Threading.Tasks;
 using DM.Services.Core.Dto.Enums;
 using DM.Services.DataAccess.SearchEngine;
 using DM.Services.Search.Configuration;
-using Nest;
+using OpenSearch.Client;
 
 namespace DM.Services.Search.Consumer.Implementation;
 
 /// <inheritdoc />
 internal class IndexingRepository : IIndexingRepository
 {
-    private readonly IElasticClient client;
+    private readonly IOpenSearchClient client;
 
     /// <inheritdoc />
     public IndexingRepository(
-        IElasticClient client)
+        IOpenSearchClient client)
     {
         this.client = client;
     }
