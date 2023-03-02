@@ -20,7 +20,7 @@ podTemplate(containers: [
 				}
 				stage('DotNet Test') {
 					warnError('Tests failed!') {
-						dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', properties: ['UseRazorBuildServer': 'false', 'UseSharedCompilation': 'false', 'ParallelizeTestCollections': 'false'], noBuild: true, noRestore: true, nologo: true, verbosity: 'quiet', shutDownBuildServers: true
+						dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', properties: ['UseRazorBuildServer': 'false', 'UseSharedCompilation': 'false', 'ParallelizeTestCollections': 'false', 'ParallelizeAssembly': 'false', 'MaxParallelThreads': '1'], noBuild: true, noRestore: true, nologo: true, verbosity: 'quiet', shutDownBuildServers: true
 					}
 					sh '/srv/tools/trx2junit UnitTestResults/*.trx'
 					recordIssues tool: junitParser(pattern: 'UnitTestResults/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
