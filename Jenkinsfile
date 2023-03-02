@@ -1,7 +1,7 @@
 #!groovy
 
 podTemplate(containers: [
-	containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'MSBUILDDISABLENODEREUSE', value: '1')]),
+	containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: '/srv/tools/tini', args: '-- sleep infinity', envVars: [containerEnvVar(key: 'MSBUILDDISABLENODEREUSE', value: '1')]),
 	containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
 ]) {
 	node(POD_LABEL) {
@@ -12,15 +12,17 @@ podTemplate(containers: [
 			container('dotnet') {
 				stage('DotNet Build') {
 					try {
-						dotnetBuild project: 'DM/DM.sln', option: '-logger:/srv/msbuildlogger/MSBuildJenkins.dll', properties: ['UseRazorBuildServer': 'false', 'UseSharedCompilation': 'false'], nologo: true, shutDownBuildServers: true
+						dotnetBuild project: 'DM/DM.sln', option: '-logger:/srv/msbuildlogger/MSBuildJenkins.dll', nologo: true
 					}
 					finally {
 						recordIssues tool: issues(pattern: 'issues.json.log'), enabledForFailure: true, qualityGates: [[threshold: 1, type: 'TOTAL_ERROR', unstable: false], [threshold: 1, type: 'NEW_NORMAL', unstable: true]], publishAllIssues: true
 					}
 				}
 				stage('DotNet Test') {
+                    //sh 'apt-get update && apt-get install -y tini || true'
 					warnError('Tests failed!') {
-						dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', properties: ['UseRazorBuildServer': 'false', 'UseSharedCompilation': 'false', 'ParallelizeTestCollections': 'false', 'ParallelizeAssembly': 'false', 'MaxParallelThreads': '1'], noBuild: true, noRestore: true, nologo: true, verbosity: 'quiet', shutDownBuildServers: true
+                        //sh 'tini -s -- dotnet test --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln'
+						dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', noBuild: true, noRestore: true, nologo: true
 					}
 					sh '/srv/tools/trx2junit UnitTestResults/*.trx'
 					recordIssues tool: junitParser(pattern: 'UnitTestResults/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
