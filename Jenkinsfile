@@ -8,11 +8,16 @@ podTemplate(containers: [
 		stage('Checkout') {
 			checkout scm
 		}
+        stage('TestTINI') {
+            mutateCommand {
+                sh 'echo hello'
+            }
+        }
 		parallel(dotnet: {
 			container('dotnet') {
 				stage('DotNet Build') {
 					try {
-						dotnetBuild project: 'DM/DM.sln', option: '-logger:/srv/msbuildlogger/MSBuildJenkins.dll', nologo: true
+                        dotnetBuild project: 'DM/DM.sln', option: '-logger:/srv/msbuildlogger/MSBuildJenkins.dll', nologo: true
 					}
 					finally {
 						recordIssues tool: issues(pattern: 'issues.json.log'), enabledForFailure: true, qualityGates: [[threshold: 1, type: 'TOTAL_ERROR', unstable: false], [threshold: 1, type: 'NEW_NORMAL', unstable: true]], publishAllIssues: true
