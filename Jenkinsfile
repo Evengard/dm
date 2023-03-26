@@ -1,8 +1,8 @@
 #!groovy
 
 podTemplate(containers: [
-	containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: '/srv/tools/tini', args: '-- sleep infinity', envVars: [containerEnvVar(key: 'UseSharedCompilation', value: 'false')]),
-	containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: '/srv/tools/tini', args: '-- sleep infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
+	containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: '/srv/tools/tini', args: '-g -- sleep infinity', envVars: [containerEnvVar(key: 'UseSharedCompilation', value: 'false'), containerEnvVar(key: 'DISABLEOUTOFPROCTASKHOST', value: 'true')], ttyEnabled: true),
+	containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: '/srv/tools/tini', args: '-g -- sleep infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
 ]) {
 	node(POD_LABEL) {
 		stage('Checkout') {
@@ -13,9 +13,7 @@ podTemplate(containers: [
 			container('dotnet') {
 				stage('DotNet Build') {
 					try {
-                        mutateCommand([prefix: ["setsid", "-w"]]) {
-                            dotnetBuild project: 'DM/DM.sln', option: '-logger:/srv/msbuildlogger/MSBuildJenkins.dll', nologo: true, shutDownBuildServers: true, properties: ['UseSharedCompilation': 'false']
-                        }
+                        dotnetBuild project: 'DM/DM.sln', option: '-logger:/srv/msbuildlogger/MSBuildJenkins.dll', nologo: true, shutDownBuildServers: true, properties: ['UseSharedCompilation': 'false']
 					}
 					finally {
 						recordIssues tool: issues(pattern: 'issues.json.log'), enabledForFailure: true, qualityGates: [[threshold: 1, type: 'TOTAL_ERROR', unstable: false], [threshold: 1, type: 'NEW_NORMAL', unstable: true]], publishAllIssues: true
@@ -25,9 +23,7 @@ podTemplate(containers: [
                     //sh 'apt-get update && apt-get install -y tini || true'
 					warnError('Tests failed!') {
                         //sh 'tini -s -- dotnet test --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln'
-                        mutateCommand([prefix: ["setsid", "-w"]]) {
-                            dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', noBuild: true, noRestore: true, nologo: true, shutDownBuildServers: true, properties: ['UseSharedCompilation': 'false']
-                        }
+                        dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', noBuild: true, noRestore: true, nologo: true, shutDownBuildServers: true, properties: ['UseSharedCompilation': 'false']
 					}
 					sh '/srv/tools/trx2junit UnitTestResults/*.trx'
 					recordIssues tool: junitParser(pattern: 'UnitTestResults/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
