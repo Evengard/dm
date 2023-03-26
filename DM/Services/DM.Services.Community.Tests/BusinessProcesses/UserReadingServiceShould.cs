@@ -34,14 +34,14 @@ public class UserReadingServiceShould : UnitTestBase
     }
 
     [Fact]
-    public void ThrowGoneWhenUserDetailsNotFound()
+    public async Task ThrowGoneWhenUserDetailsNotFound()
     {
         readingRepository
             .Setup(r => r.GetUserDetails(It.IsAny<string>()))
             .ReturnsAsync((UserDetails) null);
 
-        service.Invoking(s => s.GetDetails("User").Wait())
-            .Should().Throw<HttpException>()
+        (await service.Awaiting(s => s.GetDetails("User"))
+            .Should().ThrowAsync<HttpException>())
             .And.StatusCode.Should().Be(HttpStatusCode.Gone);
         readingRepository.Verify(r => r.GetUserDetails("User"), Times.Once);
     }
@@ -61,14 +61,14 @@ public class UserReadingServiceShould : UnitTestBase
     }
 
     [Fact]
-    public void ThrowGoneWhenUserNotFound()
+    public async Task ThrowGoneWhenUserNotFound()
     {
         readingRepository
             .Setup(r => r.GetUser(It.IsAny<string>()))
             .ReturnsAsync((GeneralUser) null);
 
-        service.Invoking(s => s.Get("User").Wait())
-            .Should().Throw<HttpException>()
+        (await service.Awaiting(s => s.Get("User"))
+            .Should().ThrowAsync<HttpException>())
             .And.StatusCode.Should().Be(HttpStatusCode.Gone);
         readingRepository.Verify(r => r.GetUser("User"), Times.Once);
     }

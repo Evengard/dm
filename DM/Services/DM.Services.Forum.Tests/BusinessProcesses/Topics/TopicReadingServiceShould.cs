@@ -44,7 +44,7 @@ public class TopicReadingServiceShould : UnitTestBase
     }
 
     [Fact]
-    public void ThrowHttpExceptionWhenAvailableTopicNotFound()
+    public async Task ThrowHttpExceptionWhenAvailableTopicNotFound()
     {
         var topicId = Guid.NewGuid();
         currentUserSetup.Returns(Create.User().Please);
@@ -56,9 +56,9 @@ public class TopicReadingServiceShould : UnitTestBase
             .Setup(r => r.Get(It.IsAny<Guid>(), It.IsAny<ForumAccessPolicy>()))
             .ReturnsAsync((Topic) null);
 
-        service.Invoking(s => s.GetTopic(topicId).Wait())
-            .Should().Throw<HttpException>()
-            .And.StatusCode.Should().Be(HttpStatusCode.Gone);
+        var err = await service.Awaiting(s => s.GetTopic(topicId))
+            .Should().ThrowAsync<HttpException>();
+        err.And.StatusCode.Should().Be(HttpStatusCode.Gone);
 
         topicRepository.Verify(r => r.Get(topicId, ForumAccessPolicy.SeniorModerator), Times.Once);
         topicRepository.VerifyNoOtherCalls();

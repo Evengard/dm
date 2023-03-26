@@ -73,12 +73,12 @@ public class ActivationServiceShould : UnitTestBase
     }
 
     [Fact]
-    public void ThrowGoneException_WhenTokenInvalid()
+    public async Task ThrowGoneException_WhenTokenInvalid()
     {
         findUserSetup.ReturnsAsync((Guid?) null);
-        activationService
-            .Invoking(s => s.Activate(Guid.NewGuid()).Wait())
-            .Should().Throw<HttpException>()
+        (await activationService
+            .Awaiting(s => s.Activate(Guid.NewGuid()))
+            .Should().ThrowAsync<HttpException>())
             .And.StatusCode.Should().Be(HttpStatusCode.Gone);
     }
 
