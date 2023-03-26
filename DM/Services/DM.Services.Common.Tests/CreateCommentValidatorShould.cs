@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DM.Services.Common.Dto;
 using FluentAssertions;
 using FluentValidation;
@@ -19,29 +20,29 @@ public class CreateCommentValidatorShould
     [InlineData("")]
     [InlineData("    ")]
     [InlineData(null)]
-    public void ThrowValidationExceptionWhenTextIsEmpty(string text)
+    public async Task ThrowValidationExceptionWhenTextIsEmpty(string text)
     {
-        validator.Invoking(v => v.ValidateAndThrowAsync(new CreateComment {Text = text}).Wait())
-            .Should().Throw<ValidationException>()
-            .And.Errors.Should().ContainSingle(e => e.PropertyName == "Text");
+        var err = await validator.Awaiting(v => v.ValidateAndThrowAsync(new CreateComment { Text = text }))
+            .Should().ThrowAsync<ValidationException>();
+        err.And.Errors.Should().ContainSingle(e => e.PropertyName == "Text");
     }
 
     [Fact]
-    public void ThrowValidationExceptionWhenTopicIdIsEmpty()
+    public async Task ThrowValidationExceptionWhenTopicIdIsEmpty()
     {
-        validator.Invoking(v => v.ValidateAndThrowAsync(new CreateComment {Text = "something"}).Wait())
-            .Should().Throw<ValidationException>()
-            .And.Errors.Should().ContainSingle(e => e.PropertyName == "EntityId");
+        var err = await validator.Awaiting(v => v.ValidateAndThrowAsync(new CreateComment { Text = "something" }))
+            .Should().ThrowAsync<ValidationException>();
+        err.And.Errors.Should().ContainSingle(e => e.PropertyName == "EntityId");
     }
 
     [Fact]
-    public void NotThrowWhenAllOk()
+    public async Task NotThrowWhenAllOk()
     {
-        validator.Invoking(v => v.ValidateAndThrowAsync(new CreateComment
+        await validator.Awaiting(v => v.ValidateAndThrowAsync(new CreateComment
             {
                 Text = "something",
                 EntityId = Guid.NewGuid()
-            }).Wait())
-            .Should().NotThrow();
+            }))
+            .Should().NotThrowAsync();
     }
 }

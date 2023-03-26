@@ -56,7 +56,7 @@ public class LikeServiceForTopicsShould : UnitTestBase
     }
 
     [Fact]
-    public void ThrowConflictExceptionWhenUserTriesToLikeTopicTwice()
+    public async Task ThrowConflictExceptionWhenUserTriesToLikeTopicTwice()
     {
         var topicId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -70,9 +70,9 @@ public class LikeServiceForTopicsShould : UnitTestBase
         });
         currentUser.Returns(Create.User(userId).Please);
 
-        service.Invoking(s => s.LikeTopic(topicId).Wait())
-            .Should().Throw<HttpException>()
-            .And.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var err = await service.Awaiting(s => s.LikeTopic(topicId))
+            .Should().ThrowAsync<HttpException>();
+        err.And.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     [Fact]
@@ -114,7 +114,7 @@ public class LikeServiceForTopicsShould : UnitTestBase
     }
 
     [Fact]
-    public void ThrowConflictExceptionWhenUserTriesToDislikeHeNeverLiked()
+    public async Task ThrowConflictExceptionWhenUserTriesToDislikeHeNeverLiked()
     {
         var topicId = Guid.NewGuid();
         topicReading.ReturnsAsync(new Topic
@@ -126,9 +126,9 @@ public class LikeServiceForTopicsShould : UnitTestBase
         });
         currentUser.Returns(Create.User().Please);
 
-        service.Invoking(s => s.DislikeTopic(topicId).Wait())
-            .Should().Throw<HttpException>()
-            .And.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var err = await service.Awaiting(s => s.DislikeTopic(topicId))
+            .Should().ThrowAsync<HttpException>();
+        err.And.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     [Fact]

@@ -68,12 +68,13 @@ public class CommentaryReadingServiceShould : UnitTestBase
     }
 
     [Fact]
-    public void ThrowException_WhenNothingFound()
+    public async Task ThrowException_WhenNothingFound()
     {
         var commentId = Guid.NewGuid();
         getCommentSetup.ReturnsAsync((Comment) null);
-        readingService.Invoking(s => s.Get(commentId).Wait())
-            .Should().Throw<HttpException>().And
+        var err = await readingService.Awaiting(s => s.Get(commentId))
+            .Should().ThrowAsync<HttpException>();
+        err.And
             .StatusCode.Should().Be(HttpStatusCode.Gone);
     }
 
