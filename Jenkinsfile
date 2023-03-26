@@ -50,6 +50,6 @@ podTemplate(containers: [
 					}
 				}
 			}
-		})
+		}, failFast: true)
 	}
 }
