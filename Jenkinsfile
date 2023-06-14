@@ -29,6 +29,12 @@ podTemplate(containers: [
 					recordIssues tool: junitParser(pattern: 'UnitTestResults/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
 					junit testResults: 'UnitTestResults/*.xml', allowEmptyResults: true
 				}
+				stage('DotNet Publish') {
+					dotnetPublish project: 'DM/Web/DM.Web.API', noBuild: true, outputDirectory: 'publish/DM.Web.API', nologo: true, shutDownBuildServers: true
+					dotnetPublish project: 'DM/Services/DM.Services.Mail.Sender.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Mail.Sender.Consumer', nologo: true, shutDownBuildServers: true
+					dotnetPublish project: 'DM/Services/DM.Services.Search.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Search.Consumer', nologo: true, shutDownBuildServers: true
+					dotnetPublish project: 'DM/Services/DM.Services.Notifications.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Notifications.Consumer', nologo: true, shutDownBuildServers: true
+				}
 			}
 		}, typescript: {
 			container('nodejs') {
@@ -45,7 +51,17 @@ podTemplate(containers: [
 						recordIssues tool: esLint(pattern: 'eslintreport.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
 					}
 				}
+				stage('VueJS Publish') {
+					fileOperations([
+						folderCopyOperation(sourceFolderPath:'DM/Web/DM.Web.Next/dist', destinationFolderPath: 'publish/DM.Web.Next')
+					])
+				}
 			}
 		}, failFast: true)
+		
+		stage('Zip Artifacts') {
+			zip zipFile: 'buildresult.zip', dir: 'publish', archive: true
+			//archiveArtifacts artifacts: 'buildresult.zip', fingerprint: true
+		}
 	}
 }
