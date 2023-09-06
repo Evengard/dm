@@ -1,8 +1,8 @@
 #!groovy
 
 podTemplate(containers: [
-	containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: '/srv/tools/tini', args: '-g -- sleep infinity', envVars: [containerEnvVar(key: 'UseSharedCompilation', value: 'false'), containerEnvVar(key: 'DISABLEOUTOFPROCTASKHOST', value: 'true')], ttyEnabled: true),
-	containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: '/srv/tools/tini', args: '-g -- sleep infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
+	containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
+	containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
 ]) {
 	node(POD_LABEL) {
 		stage('Checkout') {
@@ -22,8 +22,6 @@ podTemplate(containers: [
 				stage('DotNet Test') {
                     //sh 'apt-get update && apt-get install -y tini || true'
 					warnError('Tests failed!') {
-                        //sh 'tini -s -- dotnet test --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln'
-                        //dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', noBuild: true, noRestore: true, nologo: true, shutDownBuildServers: true, properties: ['UseSharedCompilation': 'false']
 						sh 'dotnet test --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln & wait'
 					}
 					sh '/srv/tools/trx2junit UnitTestResults/*.trx'
@@ -53,10 +51,8 @@ podTemplate(containers: [
 					}
 				}
 				stage('VueJS Publish') {
-					fileOperations([
-						folderCreateOperation(folderPath:'publish/DM.Web.Next'),
-						folderCopyOperation(sourceFolderPath:'DM/Web/DM.Web.Next/dist', destinationFolderPath: 'publish/DM.Web.Next')
-					])
+					sh 'mkdir -p publish/DM.Web.Next'
+					sh 'cp -r DM/Web/DM.Web.Next/dist/. publish/DM.Web.Next'
 				}
 			}
 		}, failFast: true)
