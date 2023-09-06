@@ -5,6 +5,8 @@ podTemplate(containers: [
 	containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
 ]) {
 	node(POD_LABEL) {
+		properties([disableConcurrentBuilds(abortPrevious: true)])
+		
 		stage('Checkout') {
 			checkout scm
 		}
