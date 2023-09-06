@@ -15,14 +15,13 @@ podTemplate(containers: [
 			container('dotnet') {
 				stage('DotNet Build') {
 					try {
-                        dotnetBuild project: 'DM/DM.sln', option: '-logger:/srv/msbuildlogger/MSBuildJenkins.dll', nologo: true
+						sh "dotnet build DM/DM.sln --nologo -logger:/srv/msbuildlogger/MSBuildJenkins.dll"
 					}
 					finally {
 						recordIssues tool: issues(pattern: 'issues.json.log'), enabledForFailure: true, qualityGates: [[threshold: 1, type: 'TOTAL_ERROR', unstable: false], [threshold: 1, type: 'NEW_NORMAL', unstable: true]], publishAllIssues: true
 					}
 				}
 				stage('DotNet Test') {
-                    //sh 'apt-get update && apt-get install -y tini || true'
 					warnError('Tests failed!') {
 						sh 'dotnet test --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln & wait'
 					}
@@ -31,10 +30,10 @@ podTemplate(containers: [
 					junit testResults: 'UnitTestResults/*.xml', allowEmptyResults: true
 				}
 				stage('DotNet Publish') {
-					dotnetPublish project: 'DM/Web/DM.Web.API', noBuild: true, outputDirectory: 'publish/DM.Web.API', nologo: true
-					dotnetPublish project: 'DM/Services/DM.Services.Mail.Sender.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Mail.Sender.Consumer', nologo: true
-					dotnetPublish project: 'DM/Services/DM.Services.Search.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Search.Consumer', nologo: true
-					dotnetPublish project: 'DM/Services/DM.Services.Notifications.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Notifications.Consumer', nologo: true
+					sh "dotnet publish DM/Web/DM.Web.API --nologo --output publish/DM.Web.API --no-build"
+					sh "dotnet publish DM/Services/DM.Services.Mail.Sender.Consumer --nologo --output publish/DM.Services.Mail.Sender.Consumer --no-build"
+					sh "dotnet publish DM/Services/DM.Services.Search.Consumer --nologo --output publish/DM.Services.Search.Consumer --no-build"
+					sh "dotnet publish DM/Services/DM.Services.Notifications.Consumer --nologo --output publish/DM.Services.Notifications.Consumer --no-build"
 				}
 			}
 		}, typescript: {
