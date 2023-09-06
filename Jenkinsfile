@@ -13,7 +13,7 @@ podTemplate(containers: [
 			container('dotnet') {
 				stage('DotNet Build') {
 					try {
-                        dotnetBuild project: 'DM/DM.sln', option: '-logger:/srv/msbuildlogger/MSBuildJenkins.dll', nologo: true, shutDownBuildServers: true, properties: ['UseSharedCompilation': 'false']
+                        dotnetBuild project: 'DM/DM.sln', option: '-logger:/srv/msbuildlogger/MSBuildJenkins.dll', nologo: true
 					}
 					finally {
 						recordIssues tool: issues(pattern: 'issues.json.log'), enabledForFailure: true, qualityGates: [[threshold: 1, type: 'TOTAL_ERROR', unstable: false], [threshold: 1, type: 'NEW_NORMAL', unstable: true]], publishAllIssues: true
@@ -29,10 +29,10 @@ podTemplate(containers: [
 					junit testResults: 'UnitTestResults/*.xml', allowEmptyResults: true
 				}
 				stage('DotNet Publish') {
-					dotnetPublish project: 'DM/Web/DM.Web.API', noBuild: true, outputDirectory: 'publish/DM.Web.API', nologo: true, shutDownBuildServers: true
-					dotnetPublish project: 'DM/Services/DM.Services.Mail.Sender.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Mail.Sender.Consumer', nologo: true, shutDownBuildServers: true
-					dotnetPublish project: 'DM/Services/DM.Services.Search.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Search.Consumer', nologo: true, shutDownBuildServers: true
-					dotnetPublish project: 'DM/Services/DM.Services.Notifications.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Notifications.Consumer', nologo: true, shutDownBuildServers: true
+					dotnetPublish project: 'DM/Web/DM.Web.API', noBuild: true, outputDirectory: 'publish/DM.Web.API', nologo: true
+					dotnetPublish project: 'DM/Services/DM.Services.Mail.Sender.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Mail.Sender.Consumer', nologo: true
+					dotnetPublish project: 'DM/Services/DM.Services.Search.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Search.Consumer', nologo: true
+					dotnetPublish project: 'DM/Services/DM.Services.Notifications.Consumer', noBuild: true, outputDirectory: 'publish/DM.Services.Notifications.Consumer', nologo: true
 				}
 			}
 		}, typescript: {
