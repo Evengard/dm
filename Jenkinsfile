@@ -23,7 +23,8 @@ podTemplate(containers: [
                     //sh 'apt-get update && apt-get install -y tini || true'
 					warnError('Tests failed!') {
                         //sh 'tini -s -- dotnet test --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln'
-                        dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', noBuild: true, noRestore: true, nologo: true, shutDownBuildServers: true, properties: ['UseSharedCompilation': 'false']
+                        //dotnetTest project: 'DM/DM.sln', logger:'trx', resultsDirectory: 'UnitTestResults', noBuild: true, noRestore: true, nologo: true, shutDownBuildServers: true, properties: ['UseSharedCompilation': 'false']
+						sh 'dotnet test --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln & wait'
 					}
 					sh '/srv/tools/trx2junit UnitTestResults/*.trx'
 					recordIssues tool: junitParser(pattern: 'UnitTestResults/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
@@ -53,6 +54,7 @@ podTemplate(containers: [
 				}
 				stage('VueJS Publish') {
 					fileOperations([
+						folderCreateOperation(folderPath:'publish/DM.Web.Next'),
 						folderCopyOperation(sourceFolderPath:'DM/Web/DM.Web.Next/dist', destinationFolderPath: 'publish/DM.Web.Next')
 					])
 				}
@@ -60,8 +62,8 @@ podTemplate(containers: [
 		}, failFast: true)
 		
 		stage('Zip Artifacts') {
-			zip zipFile: 'buildresult.zip', dir: 'publish', archive: true
-			//archiveArtifacts artifacts: 'buildresult.zip', fingerprint: true
+			zip zipFile: 'buildresult.zip', dir: 'publish'
+			archiveArtifacts artifacts: 'buildresult.zip', fingerprint: true
 		}
 	}
 }
