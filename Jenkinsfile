@@ -3,12 +3,16 @@
 podTemplate(containers: [
 	containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
 	containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
+	containerTemplate(name: 'bun', image: 'oven/bun:latest', alwaysPullImage: true, command: 'sleep', args: 'infinity')
 ]) {
 	node(POD_LABEL) {
 		properties([disableConcurrentBuilds(abortPrevious: true)])
 		
 		stage('Checkout') {
 			checkout scm
+			fileOperations([
+				folderCreateOperation(folderPath:'publish')
+			])
 		}
         
 		parallel(dotnet: {
@@ -37,11 +41,14 @@ podTemplate(containers: [
 				}
 			}
 		}, typescript: {
-			container('nodejs') {
-				dir("DM/Web/DM.Web.Next") {
+			dir("DM/Web/DM.Web.Next") {
+				container('bun') {
+					stage('VueJs Update Packages') {
+						sh 'bun update -f --no-save'
+					}
+				}
+				container('nodejs') {
 					stage('VueJs Build') {
-						sh 'yarn install --network-timeout 300000'
-						sh 'yarn upgrade --latest --network-timeout 300000'
 						sh 'yarn build'
 					}
 					stage('VueJS Lint') {
@@ -51,10 +58,11 @@ podTemplate(containers: [
 						recordIssues tool: esLint(pattern: 'eslintreport.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
 					}
 				}
-				stage('VueJS Publish') {
-					sh 'mkdir -p publish/DM.Web.Next'
-					sh 'cp -r DM/Web/DM.Web.Next/dist/. publish/DM.Web.Next'
-				}
+			}
+			stage('VueJS Publish') {
+				fileOperations([
+					folderCopyOperation(sourceFolderPath:'DM/Web/DM.Web.Next/dist', destinationFolderPath: 'publish/DM.Web.Next')
+				])
 			}
 		}, failFast: true)
 		
