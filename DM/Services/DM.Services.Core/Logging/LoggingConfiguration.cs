@@ -1,4 +1,3 @@
-using System;
 using DM.Services.Core.Configuration;
 using Jamq.Client.OpenTelemetry;
 using Microsoft.Extensions.Configuration;
@@ -7,7 +6,8 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Filters;
-using Serilog.Sinks.Elasticsearch;
+using Serilog.Sinks.OpenSearch;
+using System;
 
 namespace DM.Services.Core.Logging;
 
@@ -33,7 +33,7 @@ public static class LoggingConfiguration
             .WriteTo.Logger(lc => lc
                 .Filter.ByExcluding(Matching.FromSource("Microsoft"))
                 .WriteTo.OpenSearch(
-                    new ElasticsearchSinkOptions(new Uri(connectionStrings.Logs))
+                    new OpenSearchSinkOptions(new Uri(connectionStrings.Logs))
                     {
                         IndexFormat = "dm_logstash-{0:yyyy.MM.dd}",
                         InlineFields = true,
