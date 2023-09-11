@@ -1,22 +1,29 @@
 #!groovy
 
-def kaniko_backend_build(String proj_name) {
+def kaniko_backend_build(String proj_name, Integer index) {
   def lowercased = proj_name.toLowerCase()
-  sh """
-    /kaniko/executor  --dockerfile ContainerConfigs/Backend/Dockerfile \
-                      --context . \
-                      --destination harbor.dev.kub.core.dm.am/staging/${lowercased}:${env.GIT_COMMIT} \
-                      --cache \
-                      --cache-repo harbor.dev.kub.core.dm.am/staging/${lowercased}-cache \
-                      --build-arg PROJECT_NAME=${proj_name}
-  """
+  container("kaniko${index}") {
+    stage("${proj_name} image build") {
+      sh """
+        /kaniko/executor  --dockerfile ContainerConfigs/Backend/Dockerfile \
+                          --context . \
+                          --destination harbor.dev.kub.core.dm.am/staging/${lowercased}:${env.GIT_COMMIT} \
+                          --cache \
+                          --cache-repo harbor.dev.kub.core.dm.am/staging/${lowercased}-cache \
+                          --build-arg PROJECT_NAME=${proj_name}
+      """
+    }
+  } 
 }
 
 podTemplate(containers: [
   containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
   containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
   containerTemplate(name: 'bun', image: 'oven/bun:latest', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
-  containerTemplate(name: 'kaniko', image: 'gcr.io/kaniko-project/executor:debug', alwaysPullImage: true, command: 'sleep', args: 'infinity')
+  containerTemplate(name: 'kaniko0', image: 'gcr.io/kaniko-project/executor:debug', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
+  containerTemplate(name: 'kaniko1', image: 'gcr.io/kaniko-project/executor:debug', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
+  containerTemplate(name: 'kaniko2', image: 'gcr.io/kaniko-project/executor:debug', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
+  containerTemplate(name: 'kaniko3', image: 'gcr.io/kaniko-project/executor:debug', alwaysPullImage: true, command: 'sleep', args: 'infinity')
 ]) {
   node(POD_LABEL) {
     properties([disableConcurrentBuilds(abortPrevious: true)])
@@ -80,14 +87,23 @@ podTemplate(containers: [
       }
     }, failFast: true)
     
-    container('kaniko') {
-      stage('Backend container image builds') {
-        kaniko_backend_build("DM.Web.API")
-        kaniko_backend_build("DM.Services.Mail.Sender.Consumer")
-        kaniko_backend_build("DM.Services.Search.Consumer")
-        kaniko_backend_build("DM.Services.Notifications.Consumer")
+    
+    
+    def proj_names = [
+      "DM.Web.API",
+      "DM.Services.Mail.Sender.Consumer",
+      "DM.Services.Search.Consumer",
+      "DM.Services.Notifications.Consumer"]
+      
+    def stepsForParallel = [:]
+    proj_names.eachWithIndex { proj, index ->
+      stepsForParallel[proj] = {         
+          kaniko_backend_build(proj, index)
       }
     }
+    stepsForParallel['failFast'] = true
+    
+    parallel(stepsForParallel)
     
     stage('Zip Artifacts') {
       zip zipFile: 'buildresult.zip', dir: 'publish'
