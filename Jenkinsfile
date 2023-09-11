@@ -1,5 +1,17 @@
 #!groovy
 
+def kaniko_backend_build(String proj_name) {
+  def lowercased = proj_name.toLowerCase()
+  sh """
+    /kaniko/executor  --dockerfile ContainerConfigs/Backend/Dockerfile \
+                      --context . \
+                      --destination harbor.dev.kub.core.dm.am/staging/${lowercased}:${env.GIT_COMMIT} \
+                      --cache \
+                      --cache-repo harbor.dev.kub.core.dm.am/staging/${lowercased}-cache \
+                      --build-arg PROJECT_NAME=${proj_name}
+  """
+}
+
 podTemplate(containers: [
   containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
   containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
@@ -69,15 +81,11 @@ podTemplate(containers: [
     }, failFast: true)
     
     container('kaniko') {
-      stage('DM.Web.API container image build') {
-        sh """
-        /kaniko/executor --dockerfile ContainerConfigs/Backend/Dockerfile \
-                         --context . \
-                         --destination harbor.dev.kub.core.dm.am/staging/dm-web-api:${env.GIT_COMMIT} \
-                         --cache \
-                         --cache-repo harbor.dev.kub.core.dm.am/staging/dm-web-api-cache \
-                         --build-arg PROJECT_NAME=DM.Web.API
-        """
+      stage('Backend container image builds') {
+        kaniko_backend_build("DM.Web.API")
+        kaniko_backend_build("DM.Services.Mail.Sender.Consumer")
+        kaniko_backend_build("DM.Services.Search.Consumer")
+        kaniko_backend_build("DM.Services.Notifications.Consumer")
       }
     }
     
