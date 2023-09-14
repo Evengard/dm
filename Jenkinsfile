@@ -1,9 +1,9 @@
 #!groovy
 
-def kaniko_backend_build(String proj_name, Integer index) {
+def kaniko_backend_build(String proj_name, String proj_shortname, Integer index) {
   def lowercased = proj_name.toLowerCase()
   container("kaniko${index}") {
-    stage("${proj_name} image build") {
+    stage("${proj_shortname} image build") {
       sh """
         /kaniko/executor  --dockerfile ContainerConfigs/Backend/Dockerfile \
                           --context . \
@@ -90,15 +90,15 @@ podTemplate(containers: [
     
     
     def proj_names = [
-      "DM.Web.API",
-      "DM.Services.Mail.Sender.Consumer",
-      "DM.Services.Search.Consumer",
-      "DM.Services.Notifications.Consumer"]
+      ["DM.Web.API", "DM.Web.API"],
+      ["DM.Services.Mail.Sender.Consumer", "Mail.Sender Consumer"],
+      ["DM.Services.Search.Consumer", "Search Consumer"],
+      ["DM.Services.Notifications.Consumer", "Notifications Consumer"]]
       
     def stepsForParallel = [:]
     proj_names.eachWithIndex { proj, index ->
       stepsForParallel[proj] = {         
-          kaniko_backend_build(proj, index)
+          kaniko_backend_build(proj[0], proj[1], index)
       }
     }
     stepsForParallel['failFast'] = true
