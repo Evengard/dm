@@ -10,6 +10,7 @@ def kaniko_backend_build(String proj_name, String proj_shortname, Integer index)
                           --destination harbor.dev.kub.core.dm.am/staging/${lowercased}:${env.GIT_COMMIT} \
                           --cache \
                           --cache-repo harbor.dev.kub.core.dm.am/staging/${lowercased}-cache \
+                          --registry-mirror https://harbor.dev.kub.core.dm.am/v2/dockerhub_mirror \
                           --build-arg PROJECT_NAME=${proj_name}
       """
     }
@@ -48,7 +49,7 @@ podTemplate(containers: [
         }
         stage('DotNet Test') {
           warnError('Tests failed!') {
-            sh 'dotnet test --configuration Release --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln & wait'
+            sh 'dotnet test --configuration Release --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln'
           }
           sh '/srv/tools/trx2junit UnitTestResults/*.trx'
           recordIssues tool: junitParser(pattern: 'UnitTestResults/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
