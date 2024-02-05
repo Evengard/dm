@@ -17,7 +17,7 @@ def kaniko_backend_build(String proj_name, String proj_shortname, Integer index)
 }
 
 podTemplate(containers: [
-  containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:6.0', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
+  containerTemplate(name: 'dotnet', image: 'mcr.microsoft.com/dotnet/sdk:8.0', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
   containerTemplate(name: 'nodejs', image: 'node:current', alwaysPullImage: true, command: 'sleep', args: 'infinity', envVars: [containerEnvVar(key: 'NODE_OPTIONS', value: '--openssl-legacy-provider')]),
   containerTemplate(name: 'bun', image: 'oven/bun:latest', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
   containerTemplate(name: 'kaniko0', image: 'gcr.io/kaniko-project/executor:debug', alwaysPullImage: true, command: 'sleep', args: 'infinity'),
@@ -40,7 +40,7 @@ podTemplate(containers: [
       container('dotnet') {
         stage('DotNet Build') {
           try {
-            sh "dotnet build DM/DM.sln --nologo -logger:/srv/msbuildlogger/MSBuildJenkins.dll"
+            sh "dotnet build DM/DM.sln --configuration Release --nologo -logger:/srv/msbuildlogger/MSBuildJenkins.dll"
           }
           finally {
             recordIssues tool: issues(pattern: 'issues.json.log'), enabledForFailure: true, qualityGates: [[threshold: 1, type: 'TOTAL_ERROR', unstable: false], [threshold: 1, type: 'NEW_NORMAL', unstable: true]], publishAllIssues: true
@@ -48,7 +48,7 @@ podTemplate(containers: [
         }
         stage('DotNet Test') {
           warnError('Tests failed!') {
-            sh 'dotnet test --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln & wait'
+            sh 'dotnet test --configuration Release --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln & wait'
           }
           sh '/srv/tools/trx2junit UnitTestResults/*.trx'
           recordIssues tool: junitParser(pattern: 'UnitTestResults/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
