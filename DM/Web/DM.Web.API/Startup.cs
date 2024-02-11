@@ -1,5 +1,4 @@
-﻿using System;
-using Autofac;
+﻿using Autofac;
 using DM.Services.Common;
 using DM.Services.Community;
 using DM.Services.Core.Configuration;
@@ -34,6 +33,7 @@ using Microsoft.Extensions.Options;
 using Mongo.Migration.Startup;
 using Mongo.Migration.Startup.DotNetCore;
 using MongoDB.Driver;
+using System;
 
 namespace DM.Web.API;
 
@@ -99,12 +99,14 @@ internal class Startup
 
         if (migrateOnStart)
         {
-            var mongoConnection = configuration.GetConnectionString(nameof(ConnectionStrings.Mongo));
+            var mongoConnectionString = configuration.GetConnectionString(nameof(ConnectionStrings.Mongo));
+            var mongoClientSettings = MongoClientSettings.FromConnectionString(mongoConnectionString);
+            mongoClientSettings.ServerApi = new ServerApi(ServerApiVersion.V1);
             services.AddMigration(new MongoMigrationSettings
             {
-                ConnectionString = mongoConnection,
-                ClientSettings = MongoClientSettings.FromConnectionString(mongoConnection),
-                Database = new Uri(mongoConnection).AbsolutePath.Trim('/'),
+                ConnectionString = mongoConnectionString,
+                ClientSettings = mongoClientSettings,
+                Database = new Uri(mongoConnectionString).AbsolutePath.Trim('/'),
             });
         }
     }
