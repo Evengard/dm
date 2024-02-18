@@ -1,4 +1,3 @@
-using System;
 using Autofac;
 using DM.Services.Authentication;
 using DM.Services.Core;
@@ -8,6 +7,7 @@ using DM.Services.DataAccess.SearchEngine;
 using DM.Services.Search.Configuration;
 using Microsoft.Extensions.Options;
 using OpenSearch.Client;
+using System;
 using Module = Autofac.Module;
 
 namespace DM.Services.Search;
@@ -25,6 +25,7 @@ public class SearchEngineModule : Module
             {
                 var configuration = x.Resolve<IOptions<SearchEngineConfiguration>>().Value;
                 return new ConnectionSettings(new Uri(configuration.Endpoint))
+                    .ServerCertificateValidationCallback((sender, cert, chain, errs) => true)
                     .BasicAuthentication(configuration.Username, configuration.Password)
                     .DefaultMappingFor<SearchEntity>(m => m
                         .IndexName(SearchEngineConfiguration.IndexName));
