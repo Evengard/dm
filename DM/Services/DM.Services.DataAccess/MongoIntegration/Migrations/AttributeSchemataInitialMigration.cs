@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
-using DM.Services.Core.Dto.Enums;
+﻿using DM.Services.Core.Dto.Enums;
 using DM.Services.DataAccess.BusinessObjects.Games.Characters.Attributes;
 using Mongo.Migration.Migrations.Database;
 using MongoDB.Driver;
+using System;
+using System.Linq;
 
 namespace DM.Services.DataAccess.MongoIntegration.Migrations;
 
@@ -55,7 +55,7 @@ public class AttributeSchemataInitialMigration : DatabaseMigration
                     {
                         Id = Guid.NewGuid(),
                         Title = title,
-                        Constraints = d20ConstraintsProvider.Invoke()
+                        Constraints = d20ConstraintsProvider()
                     }),
                     IsRemoved = false,
                     UserId = null
@@ -69,7 +69,7 @@ public class AttributeSchemataInitialMigration : DatabaseMigration
                     {
                         Id = Guid.NewGuid(),
                         Title = title,
-                        Constraints = simpleConstraintsProvider.Invoke()
+                        Constraints = simpleConstraintsProvider()
                     }),
                     IsRemoved = false,
                     UserId = null

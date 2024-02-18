@@ -17,10 +17,10 @@ public class DataAccessModule : Module
     {
         builder.Register(ctx =>
             {
-                var connectionString = ctx.Resolve<IOptions<ConnectionStrings>>().Value.Mongo;
-                var settings = MongoClientSettings.FromConnectionString(connectionString);
+                var connectionString = MongoUrl.Create(ctx.Resolve<IOptions<ConnectionStrings>>().Value.Mongo);
+                var settings = MongoClientSettings.FromUrl(connectionString);
                 settings.ClusterConfigurator = cb => cb.Subscribe(
-                    new DiagnosticsActivityEventSubscriber(new InstrumentationOptions{ CaptureCommandText = true }));
+                    new DiagnosticsActivityEventSubscriber(new InstrumentationOptions { CaptureCommandText = true }));
                 return new DmMongoClient(settings, connectionString);
             })
             .AsSelf()

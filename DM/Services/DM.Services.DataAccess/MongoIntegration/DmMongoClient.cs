@@ -1,7 +1,6 @@
-using System;
-using System.Reflection;
 using DM.Services.Core.Extensions;
 using MongoDB.Driver;
+using System.Reflection;
 
 namespace DM.Services.DataAccess.MongoIntegration;
 
@@ -15,9 +14,9 @@ public class DmMongoClient : MongoClient
     private IMongoDatabase Database => GetDatabase(databaseName);
 
     /// <inheritdoc />
-    public DmMongoClient(MongoClientSettings settings, string connectionString) : base(settings)
+    public DmMongoClient(MongoClientSettings settings, MongoUrl connectionUrl) : base(settings)
     {
-        databaseName = new Uri(connectionString).AbsolutePath.Trim('/');
+        databaseName = connectionUrl.DatabaseName;
     }
 
     /// <summary>

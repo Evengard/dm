@@ -30,6 +30,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mongo.Migration;
 using Mongo.Migration.Startup;
 using Mongo.Migration.Startup.DotNetCore;
 using MongoDB.Driver;
@@ -97,18 +98,11 @@ internal class Startup
             .AddMvc(config => config.ModelBinderProviders.Insert(0, new ReadableGuidBinderProvider()))
             .AddJsonOptions(config => config.Setup(httpContextAccessor, bbParserProvider));
 
-        if (migrateOnStart)
+        var mongoConnectionString = MongoUrl.Create(configuration.GetConnectionString(nameof(ConnectionStrings.Mongo)));
+        services.AddMigration(new MongoMigrationSettings
         {
-            var mongoConnectionString = configuration.GetConnectionString(nameof(ConnectionStrings.Mongo));
-            var mongoClientSettings = MongoClientSettings.FromConnectionString(mongoConnectionString);
-            mongoClientSettings.ServerApi = new ServerApi(ServerApiVersion.V1);
-            services.AddMigration(new MongoMigrationSettings
-            {
-                ConnectionString = mongoConnectionString,
-                ClientSettings = mongoClientSettings,
-                Database = new Uri(mongoConnectionString).AbsolutePath.Trim('/'),
-            });
-        }
+            Database = mongoConnectionString.DatabaseName
+        });
     }
 
     /// <summary>
@@ -145,14 +139,17 @@ internal class Startup
     /// <param name="appBuilder"></param>
     /// <param name="integrationOptions"></param>
     /// <param name="dbContext"></param>
+    /// <param name="mongoMigration"></param>
     /// <param name="logger"></param>
     public void Configure(IApplicationBuilder appBuilder,
         IOptions<IntegrationSettings> integrationOptions,
         DmDbContext dbContext,
+        IMongoMigration mongoMigration,
         ILogger<Startup> logger)
     {
         if (migrateOnStart)
         {
+            mongoMigration.Run();
             dbContext.Database.Migrate();
             Environment.Exit(0);
         }
