@@ -1,12 +1,14 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Jamq.Client.Abstractions.Consuming;
+﻿using Jamq.Client.Abstractions.Consuming;
+using Jamq.Client.Rabbit;
 using Jamq.Client.Rabbit.Consuming;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DM.Services.Mail.Sender.Consumer;
 
@@ -35,7 +37,16 @@ internal class MailSendingConsumer : BackgroundService
         {
             ExchangeName = "dm.mail.sending",
             RoutingKeys = new[] { "#" },
-            DeadLetterExchange = "dm.mail.unsent"
+            DeadLetterExchange = new RabbitConsumerParameters("dm.mail.sender", "dm.mail.unsent-dlq", ProcessingOrder.Sequential)
+            {
+                ExchangeName = "dm.mail.unsent",
+                ExchangeType = ExchangeType.Fanout,
+                AdditionalQueueArguments = new Dictionary<string, object>
+                {
+                    { "x-dead-letter-exchange", "dm.mail.sending" },
+                    { "x-message-ttl", 60000 }
+                }
+            }
         };
         var consumer = consumerBuilder.BuildRabbit<MailLetter, MailSendingProcessor>(parameters);
         consumeRetryPolicy.Execute(consumer.Subscribe);
