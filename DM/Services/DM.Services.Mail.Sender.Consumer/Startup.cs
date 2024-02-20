@@ -6,12 +6,10 @@ using DM.Services.Core.Logging;
 using DM.Services.MessageQueuing;
 using Jamq.Client.Abstractions.Consuming;
 using Jamq.Client.DependencyInjection;
-using Jamq.Client.Rabbit;
 using Jamq.Client.Rabbit.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace DM.Services.Mail.Sender.Consumer;
 
@@ -30,7 +28,7 @@ public class Startup
     {
         this.configuration = configuration;
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -45,12 +43,10 @@ public class Startup
             .Configure<RabbitMqConfiguration>(configuration.GetSection(nameof(RabbitMqConfiguration)).Bind)
             .AddDmLogging("DM.MailSender.Consumer", configuration);
 
-        services.AddJamqClient(config => config
-            .UseRabbit(sp =>
-            {
-                var cfg = sp.GetRequiredService<IOptions<RabbitMqConfiguration>>().Value;
-                return new RabbitConnectionParameters(cfg.Endpoint, cfg.VirtualHost, cfg.Username, cfg.Password);
-            }), consumerBuilderDefaults: builder => builder.WithMiddleware<ConsumerRetryMiddleware>());
+        services.AddJamqClient(
+            config => config.UseRabbit(),
+            consumerBuilderDefaults: builder => builder.WithMiddleware<ConsumerRetryMiddleware>());
+
         services.AddHostedService<MailSendingConsumer>();
 
         services.AddHealthChecks();

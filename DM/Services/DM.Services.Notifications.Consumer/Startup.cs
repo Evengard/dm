@@ -6,13 +6,11 @@ using DM.Services.Core.Logging;
 using DM.Services.DataAccess;
 using DM.Services.MessageQueuing;
 using Jamq.Client.DependencyInjection;
-using Jamq.Client.Rabbit;
 using Jamq.Client.Rabbit.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace DM.Services.Notifications.Consumer;
 
@@ -31,7 +29,7 @@ public class Startup
     {
         this.configuration = configuration;
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -45,12 +43,7 @@ public class Startup
             .Configure<RabbitMqConfiguration>(configuration.GetSection(nameof(RabbitMqConfiguration)).Bind)
             .AddDmLogging("DM.Notifications.Consumer", configuration);
 
-        services.AddJamqClient(config => config
-            .UseRabbit(sp =>
-            {
-                var cfg = sp.GetRequiredService<IOptions<RabbitMqConfiguration>>().Value;
-                return new RabbitConnectionParameters(cfg.Endpoint, cfg.VirtualHost, cfg.Username, cfg.Password);
-            }));
+        services.AddJamqClient(config => config.UseRabbit());
         services.AddHostedService<NotificationConsumer>();
 
         services.AddHealthChecks();

@@ -9,14 +9,12 @@ using DM.Services.Search.Configuration;
 using DM.Services.Search.Consumer.Implementation;
 using DM.Services.Search.Consumer.Interceptors;
 using Jamq.Client.DependencyInjection;
-using Jamq.Client.Rabbit;
 using Jamq.Client.Rabbit.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DM.Services.Search.Consumer;
 
@@ -50,12 +48,8 @@ public class Startup
             .Configure<SearchEngineConfiguration>(configuration.GetSection(nameof(SearchEngineConfiguration)).Bind)
             .AddDmLogging("DM.Search.Consumer", configuration);
 
-        services.AddJamqClient(config => config
-            .UseRabbit(sp =>
-            {
-                var cfg = sp.GetRequiredService<IOptions<RabbitMqConfiguration>>().Value;
-                return new RabbitConnectionParameters(cfg.Endpoint, cfg.VirtualHost, cfg.Username, cfg.Password);
-            }));
+        services.AddJamqClient(config => config.UseRabbit());
+
         services.AddHostedService<SearchEngineConsumer>();
 
         services.AddDbContext<DmDbContext>(options => options
