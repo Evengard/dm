@@ -8,8 +8,8 @@
     <ItemGroup>
         <PackageReference Include="Autofac" Version="8.0.0" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
-        <PackageReference Include="Jamq.Client.Rabbit.DependencyInjection" Version="0.10.0" />
-        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.1" />
+        <PackageReference Include="Jamq.Client.Rabbit.DependencyInjection" Version="0.11.0-alpha2" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.2" />
     </ItemGroup>
 
     <ItemGroup>

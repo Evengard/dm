@@ -53,7 +53,7 @@ public static class LoggingConfiguration
                 .AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources") // MongoDb is not too fancy
                 .AddJamqClientInstrumentation()
                 .AddConsoleExporter()
-                .AddJaegerExporter(options => options.Endpoint = new Uri(connectionStrings.TracingEndpoint)));
+                .AddOtlpExporter(options => options.Endpoint = new Uri(connectionStrings.TracingEndpoint)));
 
         return services.AddLogging(b => b.AddSerilog());
     }
