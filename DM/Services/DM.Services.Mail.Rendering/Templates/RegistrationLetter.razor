@@ -1,0 +1,12 @@
+﻿@using DM.Services.Mail.Rendering.ViewModels
+
+
+<h3>Добро пожаловать на DM.AM!</h3>
+
+Ваш логин: @Model.Login<br />
+Ваша ссылка для активации: <a href="@Model.ConfirmationLinkUrl">НАЖАТЬ СЮДЫ</a>
+
+@code {
+    [Parameter]
+    public RegistrationConfirmationViewModel Model { get; set; }
+}

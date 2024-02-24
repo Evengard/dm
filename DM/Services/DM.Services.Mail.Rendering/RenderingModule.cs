@@ -1,5 +1,6 @@
 using Autofac;
-using DM.Services.Core.Extensions;
+using DM.Services.Mail.Rendering.Rendering;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace DM.Services.Mail.Rendering;
 
@@ -9,7 +10,13 @@ public class RenderingModule : Module
     /// <inheritdoc />
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterDefaultTypes();
+        builder.RegisterType<HtmlRenderer>()
+            .AsSelf()
+            .SingleInstance();
+
+        builder.RegisterType<TemplateRenderer>()
+            .AsImplementedInterfaces()
+            .SingleInstance();
 
         base.Load(builder);
     }

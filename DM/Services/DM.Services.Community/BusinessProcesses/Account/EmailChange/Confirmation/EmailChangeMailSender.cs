@@ -1,10 +1,10 @@
-using System;
-using System.Threading.Tasks;
-using DM.Services.Community.BusinessProcesses.Account.Registration.Confirmation;
 using DM.Services.Core.Configuration;
 using DM.Services.Mail.Rendering.Rendering;
+using DM.Services.Mail.Rendering.ViewModels;
 using DM.Services.Mail.Sender;
 using Microsoft.Extensions.Options;
+using System;
+using System.Threading.Tasks;
 
 namespace DM.Services.Community.BusinessProcesses.Account.EmailChange.Confirmation;
 
@@ -29,12 +29,10 @@ internal class EmailChangeMailSender : IEmailChangeMailSender
     /// <inheritdoc />
     public async Task Send(string email, string login, Guid token)
     {
-        var confirmationLinkUri = new Uri(new Uri(integrationSettings.WebUrl), $"activate/{token}");
-        var emailBody = await renderer.Render("RegistrationLetter", new RegistrationConfirmationViewModel
-        {
-            Login = login,
-            ConfirmationLinkUrl = confirmationLinkUri.ToString()
-        });
+        var confirmationLinkUrl = new Uri(new Uri(integrationSettings.WebUrl), $"activate/{token}");
+        var emailBody = await renderer.Render(new RegistrationConfirmationViewModel(
+            login,
+            confirmationLinkUrl.ToString()));
         await mailSender.Send(new MailLetter
         {
             Address = email,

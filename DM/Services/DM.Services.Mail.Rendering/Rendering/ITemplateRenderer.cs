@@ -10,9 +10,8 @@ internal interface ITemplateRenderer
     /// <summary>
     /// Render template against model
     /// </summary>
-    /// <param name="templatePath">Template path</param>
     /// <param name="model">Model</param>
     /// <typeparam name="TModel">Model type</typeparam>
     /// <returns>Rendered template</returns>
-    Task<string> Render<TModel>(string templatePath, TModel model);
+    Task<string> Render<TModel>(TModel model);
 }
