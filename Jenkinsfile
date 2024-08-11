@@ -62,7 +62,7 @@ podTemplate(containers: [
           sh "dotnet publish DM/Services/DM.Services.Notifications.Consumer --nologo --output publish/DM.Services.Notifications.Consumer --no-build"
         }
       }
-    }, typescript: {
+    }, /*typescript: {
       dir("DM/Web/DM.Web.Next") {
         container('bun') {
           stage('VueJs Update Packages') {
@@ -86,7 +86,7 @@ podTemplate(containers: [
           folderCopyOperation(sourceFolderPath:'DM/Web/DM.Web.Next/dist', destinationFolderPath: 'publish/DM.Web.Next')
         ])
       }
-    }, failFast: true)
+    },*/ failFast: true)
     
     
     

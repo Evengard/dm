@@ -13,6 +13,7 @@
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
       <PackageReference Include="MongoDB.Driver" />
+      <PackageReference Include="MongoDB.Driver.Core" />
       <PackageReference Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     </ItemGroup>

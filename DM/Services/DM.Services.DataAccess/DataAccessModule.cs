@@ -19,8 +19,9 @@ public class DataAccessModule : Module
             {
                 var connectionString = MongoUrl.Create(ctx.Resolve<IOptions<ConnectionStrings>>().Value.Mongo);
                 var settings = MongoClientSettings.FromUrl(connectionString);
-                settings.ClusterConfigurator = cb => cb.Subscribe(
-                    new DiagnosticsActivityEventSubscriber(new InstrumentationOptions { CaptureCommandText = true }));
+                // TODO: revert it back when the library providing it gets updated
+                /*settings.ClusterConfigurator = cb => cb.Subscribe(
+                    new DiagnosticsActivityEventSubscriber(new InstrumentationOptions { CaptureCommandText = true }));*/
                 return new DmMongoClient(settings, connectionString);
             })
             .AsSelf()
