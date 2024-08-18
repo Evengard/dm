@@ -41,7 +41,7 @@ podTemplate(containers: [
       container('dotnet') {
         stage('DotNet Build') {
           try {
-            sh "dotnet build DM/DM.sln --configuration Release --nologo -logger:/srv/msbuildlogger/MSBuildJenkins.dll"
+            sh "dotnet build DM.sln --configuration Release --nologo -logger:/srv/msbuildlogger/MSBuildJenkins.dll"
           }
           finally {
             recordIssues tool: issues(pattern: 'issues.json.log'), enabledForFailure: true, qualityGates: [[threshold: 1, type: 'TOTAL_ERROR', unstable: false], [threshold: 1, type: 'NEW_NORMAL', unstable: true]], publishAllIssues: true
@@ -49,17 +49,17 @@ podTemplate(containers: [
         }
         stage('DotNet Test') {
           warnError('Tests failed!') {
-            sh 'dotnet test --configuration Release --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM/DM.sln'
+            sh 'dotnet test --configuration Release --no-restore --no-build --nologo --logger trx --results-directory UnitTestResults DM.sln'
           }
           sh '/srv/tools/trx2junit UnitTestResults/*.trx'
           recordIssues tool: junitParser(pattern: 'UnitTestResults/*.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], publishAllIssues: true
           junit testResults: 'UnitTestResults/*.xml', allowEmptyResults: true
         }
         stage('DotNet Publish') {
-          sh "dotnet publish DM/Web/DM.Web.API --nologo --output publish/DM.Web.API --no-build"
-          sh "dotnet publish DM/Services/DM.Services.Mail.Sender.Consumer --nologo --output publish/DM.Services.Mail.Sender.Consumer --no-build"
-          sh "dotnet publish DM/Services/DM.Services.Search.Consumer --nologo --output publish/DM.Services.Search.Consumer --no-build"
-          sh "dotnet publish DM/Services/DM.Services.Notifications.Consumer --nologo --output publish/DM.Services.Notifications.Consumer --no-build"
+          sh "dotnet publish src/DM.Web.API --nologo --output publish/DM.Web.API --no-build"
+          sh "dotnet publish src/DM.Services.Mail.Sender.Consumer --nologo --output publish/DM.Services.Mail.Sender.Consumer --no-build"
+          sh "dotnet publish src/DM.Services.Search.Consumer --nologo --output publish/DM.Services.Search.Consumer --no-build"
+          sh "dotnet publish src/DM.Services.Notifications.Consumer --nologo --output publish/DM.Services.Notifications.Consumer --no-build"
         }
       }
     }, /*typescript: {
