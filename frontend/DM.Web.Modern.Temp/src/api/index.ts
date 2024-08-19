@@ -19,7 +19,7 @@ const defaultHeaders: { [key: string]: string } = {
   [renderKey]: "html",
 };
 
-const apiHost = "http://localhost:5051"; // Config
+const apiHost = "https://api-dm3dev.dev.kub.core.dm.am"; // Config
 
 const configuration: AxiosRequestConfig = {
   baseURL: `${apiHost}/v1`,
