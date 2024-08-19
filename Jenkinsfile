@@ -62,8 +62,8 @@ podTemplate(containers: [
           sh "dotnet publish src/DM.Services.Notifications.Consumer --nologo --output publish/DM.Services.Notifications.Consumer --no-build"
         }
       }
-    }, /*typescript: {
-      dir("DM/Web/DM.Web.Next") {
+    }, typescript: {
+      dir("frontend/DM.Web.Modern.Temp") {
         container('bun') {
           stage('VueJs Update Packages') {
             sh 'bun update -f --no-save'
@@ -83,10 +83,10 @@ podTemplate(containers: [
       }
       stage('VueJS Publish') {
         fileOperations([
-          folderCopyOperation(sourceFolderPath:'DM/Web/DM.Web.Next/dist', destinationFolderPath: 'publish/DM.Web.Next')
+          folderCopyOperation(sourceFolderPath:'frontend/DM.Web.Modern.Temp/dist', destinationFolderPath: 'publish/DM.Web.Modern.Temp')
         ])
       }
-    },*/ failFast: true)
+    }, failFast: true)
     
     
     
