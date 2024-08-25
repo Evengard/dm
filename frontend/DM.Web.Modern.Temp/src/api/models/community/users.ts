@@ -1,18 +1,6 @@
 import type { Id, Served } from "@/api/models";
 import type { UserSettings } from "@/api/models/community/user-settings";
 
-export type RegisterCredentials = {
-  email: string;
-  login: string;
-  password: string;
-}
-
-export type LoginCredentials = {
-  login: string;
-  password: string;
-  rememberMe: boolean;
-}
-
 export type Rating = {
   enabled: boolean;
   quality: number;
