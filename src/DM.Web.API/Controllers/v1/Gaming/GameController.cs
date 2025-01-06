@@ -50,7 +50,7 @@ public class GameController : ControllerBase
     public async Task<IActionResult> GetOwnGames() => Ok(await gameApiService.GetOwn());
 
     /// <summary>
-    /// Get list of all game tags
+    /// Get list of 10 most popular games by readers
     /// </summary>
     /// <response code="200"></response>
     [HttpGet("popular", Name = nameof(GetPopularGames))]
