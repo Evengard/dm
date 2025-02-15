@@ -4,6 +4,7 @@ using DM.Web.API.Authentication;
 using DM.Web.API.Dto.Contracts;
 using DM.Web.API.Dto.Games;
 using DM.Web.API.Services.Gaming.Rooms;
+using DM.Web.API.Services.Gaming;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DM.Web.API.Controllers.v1.Gaming;
@@ -17,20 +18,23 @@ public class RoomController : ControllerBase
     private readonly IRoomApiService roomApiService;
     private readonly IRoomClaimApiService claimApiService;
     private readonly IPendingPostApiService pendingPostApiService;
+    private readonly IPostApiService postApiService;
 
     /// <inheritdoc />
     public RoomController(
         IRoomApiService roomApiService,
         IRoomClaimApiService claimApiService,
-        IPendingPostApiService pendingPostApiService)
+        IPendingPostApiService pendingPostApiService,
+        IPostApiService postApiService)
     {
         this.roomApiService = roomApiService;
         this.claimApiService = claimApiService;
         this.pendingPostApiService = pendingPostApiService;
+        this.postApiService = postApiService;
     }
 
     /// <summary>
-    /// Get list of game rooms
+    /// Get list of rooms in game
     /// </summary>
     /// <param name="id"></param>
     /// <response code="200"></response>
@@ -41,7 +45,7 @@ public class RoomController : ControllerBase
     public async Task<IActionResult> GetRooms(Guid id) => Ok(await roomApiService.GetAll(id));
 
     /// <summary>
-    /// Post new character
+    /// Create new room in game
     /// </summary>
     /// <param name="id"></param>
     /// <param name="room"></param>
@@ -65,7 +69,7 @@ public class RoomController : ControllerBase
     }
 
     /// <summary>
-    /// Get certain room
+    /// Get room
     /// </summary>
     /// <param name="id"></param>
     /// <response code="200"></response>
@@ -75,7 +79,7 @@ public class RoomController : ControllerBase
     public async Task<IActionResult> GetRoom(Guid id) => Ok(await roomApiService.Get(id));
 
     /// <summary>
-    /// Put room changes
+    /// Update room
     /// </summary>
     /// <param name="id"></param>
     /// <param name="room"></param>
@@ -95,7 +99,7 @@ public class RoomController : ControllerBase
         Ok(await roomApiService.Update(id, room));
 
     /// <summary>
-    /// Delete certain room
+    /// Delete room
     /// </summary>
     /// <param name="id"></param>
     /// <response code="204"></response>
@@ -115,7 +119,7 @@ public class RoomController : ControllerBase
     }
 
     /// <summary>
-    /// Post new room claim
+    /// Create new claim for room
     /// </summary>
     /// <param name="id"></param>
     /// <param name="claim"></param>
@@ -141,7 +145,7 @@ public class RoomController : ControllerBase
     }
 
     /// <summary>
-    /// Update room claim
+    /// Update claim for room
     /// </summary>
     /// <param name="id"></param>
     /// <param name="claim"></param>
@@ -161,7 +165,7 @@ public class RoomController : ControllerBase
         Ok(await claimApiService.Update(id, claim));
 
     /// <summary>
-    /// Delete room claim
+    /// Delete claim for room
     /// </summary>
     /// <param name="id"></param>
     /// <response code="204"></response>
@@ -181,7 +185,7 @@ public class RoomController : ControllerBase
     }
 
     /// <summary>
-    /// Post new pending post
+    /// Create new post pendency
     /// </summary>
     /// <param name="id"></param>
     /// <param name="pendingPost"></param>
@@ -191,7 +195,7 @@ public class RoomController : ControllerBase
     /// <response code="403">User is not allowed to create post pendings in this room</response>
     /// <response code="409">Post pending already exists</response>
     /// <response code="410">Room not found</response>
-    [HttpPost("rooms/{id}/pendings", Name = nameof(CreatePendingPost))]
+    [HttpPost("rooms/{id}/pendencies", Name = nameof(CreatePendingPost))]
     [AuthenticationRequired]
     [ProducesResponseType(typeof(Envelope<PendingPost>), 201)]
     public async Task<IActionResult> CreatePendingPost(Guid id, [FromBody] PendingPost pendingPost)
@@ -201,14 +205,14 @@ public class RoomController : ControllerBase
     }
 
     /// <summary>
-    /// Delete pending post
+    /// Delete post pendency
     /// </summary>
     /// <param name="id"></param>
     /// <response code="204"></response>
     /// <response code="401">User must be authenticated</response>
     /// <response code="403">User is not allowed to delete this pending post</response>
     /// <response code="410">Pending post not found</response>
-    [HttpDelete("rooms/pendings/{id}", Name = nameof(DeletePendingPost))]
+    [HttpDelete("rooms/pendencies/{id}", Name = nameof(DeletePendingPost))]
     [AuthenticationRequired]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(GeneralError), 401)]
@@ -217,6 +221,24 @@ public class RoomController : ControllerBase
     public async Task<IActionResult> DeletePendingPost(Guid id)
     {
         await pendingPostApiService.Delete(id);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Mark all posts in room as read
+    /// </summary>
+    /// <param name="id"></param>
+    /// <response code="204"></response>
+    /// <response code="401">User must be authenticated</response>
+    /// <response code="410">Room not found</response>
+    [HttpDelete("rooms/{id}/posts/unread", Name = nameof(MarkPostsAsRead))]
+    [AuthenticationRequired]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(typeof(GeneralError), 401)]
+    [ProducesResponseType(typeof(GeneralError), 410)]
+    public async Task<IActionResult> MarkPostsAsRead(Guid id)
+    {
+        await postApiService.MarkAsRead(id);
         return NoContent();
     }
 }

@@ -10,7 +10,7 @@ namespace DM.Web.API.Controllers.v1.Gaming;
 
 /// <inheritdoc />
 [ApiController]
-[Route("v1/schemata")]
+[Route("v1/schemas")]
 [ApiExplorerSettings(GroupName = "Game")]
 public class AttributeSchemaController : ControllerBase
 {
@@ -24,7 +24,7 @@ public class AttributeSchemaController : ControllerBase
     }
 
     /// <summary>
-    /// Get list of game attribute schemas
+    /// Get list of game attribute schemas (public and authored)
     /// </summary>
     /// <response code="200"></response>
     [HttpGet(Name = nameof(GetSchemas))]
@@ -32,7 +32,7 @@ public class AttributeSchemaController : ControllerBase
     public async Task<IActionResult> GetSchemas() => Ok(await schemaApiService.Get());
 
     /// <summary>
-    /// Post new attribute schema
+    /// Create new attribute schema
     /// </summary>
     /// <param name="schema"></param>
     /// <response code="201"></response>
@@ -48,11 +48,11 @@ public class AttributeSchemaController : ControllerBase
     public async Task<IActionResult> PostSchema([FromBody] AttributeSchema schema)
     {
         var result = await schemaApiService.Create(schema);
-        return CreatedAtRoute(nameof(GetSchema), new {id = result.Resource.Id}, result);
-    } 
+        return CreatedAtRoute(nameof(GetSchema), new { id = result.Resource.Id }, result);
+    }
 
     /// <summary>
-    /// Get certain attribute schema
+    /// Get attribute schema
     /// </summary>
     /// <param name="id"></param>
     /// <response code="200"></response>
@@ -63,7 +63,19 @@ public class AttributeSchemaController : ControllerBase
     public async Task<IActionResult> GetSchema(Guid id) => Ok(await schemaApiService.Get(id));
 
     /// <summary>
-    /// Update existing attribute schema
+    /// Get attribute schema details
+    /// </summary>
+    /// <param name="id"></param>
+    /// <response code="200"></response>
+    /// <response code="410">Schema not found</response>
+    [HttpGet("{id}/details", Name = nameof(GetSchemaDetails))]
+    [ProducesResponseType(typeof(Envelope<AttributeSchema>), 200)]
+    [ProducesResponseType(typeof(GeneralError), 410)]
+    // TODO: Get attribute schema details 
+    public Task<IActionResult> GetSchemaDetails(Guid id) => throw new NotImplementedException();
+
+    /// <summary>
+    /// Update attribute schema
     /// </summary>
     /// <param name="id"></param>
     /// <param name="schema"></param>
@@ -83,7 +95,7 @@ public class AttributeSchemaController : ControllerBase
         Ok(await schemaApiService.Update(id, schema));
 
     /// <summary>
-    /// Delete existing attribute schema
+    /// Delete attribute schema
     /// </summary>
     /// <param name="id"></param>
     /// <response code="204"></response>

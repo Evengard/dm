@@ -25,7 +25,7 @@ public class SearchController : ControllerBase
     }
 
     /// <summary>
-    /// 
+    /// Get list of everything that has specified text
     /// </summary>
     /// <returns></returns>
     [HttpGet]

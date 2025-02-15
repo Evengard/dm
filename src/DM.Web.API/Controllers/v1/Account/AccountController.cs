@@ -65,7 +65,7 @@ public class AccountController : ControllerBase
     public async Task<IActionResult> Activate(Guid token) => Ok(await activationApiService.Activate(token));
 
     /// <summary>
-    /// Get current user
+    /// Get current user details
     /// </summary>
     /// <response code="200"></response>
     [HttpGet(Name = nameof(GetCurrent))]

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using DM.Services.Core.Dto;
 using DM.Web.API.Authentication;
 using DM.Web.API.Dto.Contracts;
 using DM.Web.API.Dto.Shared;
@@ -7,11 +8,11 @@ using DM.Web.API.Dto.Users;
 using DM.Web.API.Services.Fora;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DM.Web.API.Controllers.v1.Fora;
+namespace DM.Web.API.Controllers.v1.Forums;
 
 /// <inheritdoc />
 [ApiController]
-[Route("v1/forum/comments")]
+[Route("v1")]
 [ApiExplorerSettings(GroupName = "Forum")]
 public class CommentController : ControllerBase
 {
@@ -28,18 +29,55 @@ public class CommentController : ControllerBase
     }
 
     /// <summary>
-    /// Get comment
+    /// Get list of comments in topic
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="q"></param>
+    /// <response code="200"></response>
+    /// <response code="410">Topic not found</response>
+    [HttpGet("topics/{id}/comments", Name = nameof(GetForumComments))]
+    [ProducesResponseType(typeof(ListEnvelope<Comment>), 200)]
+    [ProducesResponseType(typeof(GeneralError), 410)]
+    public async Task<IActionResult> GetForumComments(Guid id, [FromQuery] PagingQuery q) =>
+        Ok(await commentApiService.Get(id, q));
+
+    /// <summary>
+    /// Create new comment in topic
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="comment">Comment</param>
+    /// <response code="201"></response>
+    /// <response code="400">Some of comment properties were invalid</response>
+    /// <response code="401">User must be authenticated</response>
+    /// <response code="403">User is not allowed to comment this topic</response>
+    /// <response code="410">Topic not found</response>
+    [HttpPost("topics/{id}/comments", Name = nameof(PostForumComment))]
+    [AuthenticationRequired]
+    [ProducesResponseType(typeof(Envelope<Comment>), 201)]
+    [ProducesResponseType(typeof(BadRequestError), 400)]
+    [ProducesResponseType(typeof(GeneralError), 401)]
+    [ProducesResponseType(typeof(GeneralError), 403)]
+    [ProducesResponseType(typeof(GeneralError), 410)]
+    public async Task<IActionResult> PostForumComment(Guid id, [FromBody] Comment comment)
+    {
+        var result = await commentApiService.Create(id, comment);
+        return CreatedAtRoute(nameof(CommentController.GetForumComment), new { id = result.Resource.Id }, result);
+    }
+
+
+    /// <summary>
+    /// Get forum comment
     /// </summary>
     /// <param name="id"></param>
     /// <response code="200"></response>
     /// <response code="410">Comment not found</response>
-    [HttpGet("{id}", Name = nameof(GetForumComment))]
+    [HttpGet("forum/comments/{id}", Name = nameof(GetForumComment))]
     [ProducesResponseType(typeof(Envelope<Comment>), 200)]
     [ProducesResponseType(typeof(GeneralError), 410)]
     public async Task<IActionResult> GetForumComment(Guid id) => Ok(await commentApiService.Get(id));
 
     /// <summary>
-    /// Update comment
+    /// Update forum comment
     /// </summary>
     /// <param name="id"></param>
     /// <param name="comment"></param>
@@ -48,7 +86,7 @@ public class CommentController : ControllerBase
     /// <response code="401">User must be authenticated</response>
     /// <response code="403">User is not allowed to change this comment</response>
     /// <response code="410">Comment not found</response>
-    [HttpPatch("{id}", Name = nameof(PutForumComment))]
+    [HttpPatch("forum/comments/{id}", Name = nameof(PutForumComment))]
     [AuthenticationRequired]
     [ProducesResponseType(typeof(Envelope<Comment>), 200)]
     [ProducesResponseType(typeof(BadRequestError), 400)]
@@ -59,14 +97,14 @@ public class CommentController : ControllerBase
         Ok(await commentApiService.Update(id, comment));
 
     /// <summary>
-    /// Delete comment
+    /// Delete forum comment
     /// </summary>
     /// <param name="id"></param>
     /// <response code="204"></response>
     /// <response code="401">User must be authenticated</response>
     /// <response code="403">User is not allowed to change this comment</response>
     /// <response code="410">Comment not found</response>
-    [HttpDelete("{id}", Name = nameof(DeleteForumComment))]
+    [HttpDelete("forum/comments/{id}", Name = nameof(DeleteForumComment))]
     [AuthenticationRequired]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(GeneralError), 401)]
@@ -79,7 +117,7 @@ public class CommentController : ControllerBase
     }
 
     /// <summary>
-    /// Post new like
+    /// Add new like to forum comment
     /// </summary>
     /// <param name="id"></param>
     /// <response code="201"></response>
@@ -87,7 +125,7 @@ public class CommentController : ControllerBase
     /// <response code="403">User is not allowed to like the comment</response>
     /// <response code="409">User already liked this comment</response>
     /// <response code="410">Comment not found</response>
-    [HttpPost("{id}/likes", Name = nameof(PostForumCommentLike))]
+    [HttpPost("forum/comments/{id}/likes", Name = nameof(PostForumCommentLike))]
     [AuthenticationRequired]
     [ProducesResponseType(typeof(Envelope<User>), 201)]
     [ProducesResponseType(typeof(GeneralError), 401)]
@@ -101,7 +139,7 @@ public class CommentController : ControllerBase
     }
 
     /// <summary>
-    /// Delete like
+    /// Delete like from forum comment
     /// </summary>
     /// <param name="id"></param>
     /// <response code="204"></response>
@@ -109,7 +147,7 @@ public class CommentController : ControllerBase
     /// <response code="403">User is not allowed to remove like from this comment</response>
     /// <response code="409">User has no like for this comment</response>
     /// <response code="410">Comment not found</response>
-    [HttpDelete("{id}/likes", Name = nameof(DeleteForumCommentLike))]
+    [HttpDelete("forum/comments/{id}/likes", Name = nameof(DeleteForumCommentLike))]
     [AuthenticationRequired]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(GeneralError), 401)]

@@ -25,7 +25,7 @@ public class UserUploadController : ControllerBase
     }
 
     /// <summary>
-    /// Post user profile picture
+    /// Add picture
     /// </summary>
     /// <param name="login"></param>
     /// <param name="file"></param>

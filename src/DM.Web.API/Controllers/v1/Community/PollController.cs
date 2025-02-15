@@ -24,7 +24,7 @@ public class PollController : ControllerBase
     }
 
     /// <summary>
-    /// Get list of polls
+    /// Get list of global polls
     /// </summary>
     /// <param name="q"></param>
     /// <response code="200"></response>
@@ -33,14 +33,14 @@ public class PollController : ControllerBase
     public async Task<IActionResult> GetPolls([FromQuery] PollsQuery q) => Ok(await apiService.Get(q));
 
     /// <summary>
-    /// Create new poll
+    /// Create new global poll
     /// </summary>
     /// <param name="poll"></param>
     /// <response code="201"></response>
     /// <response code="400">Some poll properties were invalid</response>
     /// <response code="401">User must be authenticated</response>
     /// <response code="403">User is not authorized to create polls</response>
-    [HttpPost(Name = nameof(PostPoll))]
+    [HttpPost("global", Name = nameof(PostPoll))]
     [AuthenticationRequired]
     [ProducesResponseType(typeof(Envelope<Poll>), 201)]
     [ProducesResponseType(typeof(BadRequestError), 400)]
@@ -53,7 +53,7 @@ public class PollController : ControllerBase
     }
 
     /// <summary>
-    /// Get poll by id
+    /// Get poll
     /// </summary>
     /// <param name="id"></param>
     /// <response code="200"></response>
@@ -64,6 +64,34 @@ public class PollController : ControllerBase
     public async Task<IActionResult> GetPoll(Guid id) => Ok(await apiService.Get(id));
 
     /// <summary>
+    /// Update poll
+    /// </summary>
+    /// <param name="id"></param>
+    /// <response code="200"></response>
+    /// <response code="401">User must be authenticated</response>
+    /// <response code="410">Poll not found</response>
+    [HttpPatch("{id}", Name = nameof(PatchPoll))]
+    [ProducesResponseType(typeof(Envelope<Poll>), 200)]
+    [ProducesResponseType(typeof(GeneralError), 401)]
+    [ProducesResponseType(typeof(GeneralError), 410)]
+    // TODO: Update poll
+    public Task<IActionResult> PatchPoll(Guid id) => throw new NotImplementedException();
+
+    /// <summary>
+    /// Delete poll
+    /// </summary>
+    /// <param name="id"></param>
+    /// <response code="200"></response>
+    /// <response code="401">User must be authenticated</response>
+    /// <response code="410">Poll not found</response>
+    [HttpDelete("{id}", Name = nameof(DeletePoll))]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(typeof(GeneralError), 401)]
+    [ProducesResponseType(typeof(GeneralError), 410)]
+    // TODO: Delete poll
+    public Task<IActionResult> DeletePoll(Guid id) => throw new NotImplementedException();
+
+    /// <summary>
     /// Vote for the poll option
     /// </summary>
     /// <param name="id"></param>
@@ -72,12 +100,29 @@ public class PollController : ControllerBase
     /// <response code="401">User must be authenticated</response>
     /// <response code="403">User is not authorized to vote for this poll</response>
     /// <response code="410">Poll not found</response>
-    [HttpPut("{id}", Name = nameof(PutPollVote))]
+    [HttpPost("{id}/vote", Name = nameof(PostPollVote))]
     [AuthenticationRequired]
     [ProducesResponseType(typeof(Envelope<Poll>), 200)]
     [ProducesResponseType(typeof(GeneralError), 401)]
     [ProducesResponseType(typeof(GeneralError), 403)]
     [ProducesResponseType(typeof(GeneralError), 410)]
-    public async Task<IActionResult> PutPollVote(Guid id, [FromQuery] Guid optionId) =>
+    public async Task<IActionResult> PostPollVote(Guid id, [FromQuery] Guid optionId) =>
         Ok(await apiService.Vote(id, optionId));
+
+    /// <summary>
+    /// Delete vote for the poll option
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="optionId"></param>
+    /// <response code="200"></response>
+    /// <response code="401">User must be authenticated</response>
+    /// <response code="403">User is not authorized to vote for this poll</response>
+    /// <response code="410">Poll not found</response>
+    [HttpDelete("{id}/vote", Name = nameof(DeletePollVote))]
+    [AuthenticationRequired]
+    [ProducesResponseType(typeof(Envelope<Poll>), 200)]
+    [ProducesResponseType(typeof(GeneralError), 401)]
+    [ProducesResponseType(typeof(GeneralError), 403)]
+    [ProducesResponseType(typeof(GeneralError), 410)]
+    public async Task<IActionResult> DeletePollVote(Guid id, [FromQuery] Guid optionId) => Ok(await apiService.Get(id));
 }

@@ -23,7 +23,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Get list of community users
+    /// Get list of activated users
     /// </summary>
     /// <response code="200"></response>
     [HttpGet("")]
@@ -32,7 +32,7 @@ public class UserController : ControllerBase
         Ok(await userApiService.GetUsers(query));
 
     /// <summary>
-    /// Get certain user
+    /// Get user
     /// </summary>
     /// <param name="login"></param>
     /// <response code="200"></response>
@@ -43,7 +43,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetUser(string login) => Ok(await userApiService.GetUser(login));
 
     /// <summary>
-    /// Get certain user details
+    /// Get user details
     /// </summary>
     /// <param name="login"></param>
     /// <response code="200"></response>
